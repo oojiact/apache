@@ -1,0 +1,14 @@
+version: '2'
+
+services:
+  apache:
+    image: apache-python
+    container_name: apa
+    ports:
+      - '80:80'
+#    volumes:
+#      - 'apache_data:/bitnami'
+#      - ./conf/:/bitnami/apache/conf
+volumes:
+  apache_data:
+    driver: local
