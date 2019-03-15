@@ -151,4 +151,46 @@ edit httpd.conf
 User apache
 Group apache 
 
+1.3.2	Give	the	Apache	User	Account	an	Invalid	Shell	(Scored)
+
+Change	the	apache account	to	use	the	nologin shell	or	an	invalid	shell	such	as	/dev/null:
+
+
+1.3.3	Lock	the	Apache	User	Account	(Scored)
+# passwd -S apache 
+apache LK 2010-01-28 0 99999 7 -1 (Password locked.) 
+apache L 07/02/2012 -1 -1 -1 -1 
+
+# passwd -l apache 
+
+
+1.3.4	Set	Ownership	on	Apache	Directories	and	Files	(Scored)
+
+# find $APACHE_PREFIX \! -user root -ls 
+$ chown -R root $APACHE_PREFIX 
+
+
+1.3.5	Set	Group	Id	on	Apache	Directories	and	Files	(Scored)
+
+$ chgrp -R root $APACHE_PREFIX 
+
+1.3.6	Restrict	Other	Write	Access	on	Apache	Directories	and	Files	
+(Scored)
+
+chmod -R o-w $APACHE_PREFIX
+
+
+1.3.7	Secure	Core	Dump	Directory	(Scored)
+
+chown root:apache /var/log/httpd 
+chmod o-rwx /var/log/httpd 
+
+
+
+1.3.8	Secure	the	Lock	File	(Scored)
+
+
+
+
+
 
