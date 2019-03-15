@@ -514,6 +514,10 @@ LimitRequestFieldsize 1024
 
 
 
+1.10.4	Set	the	LimitRequestBody	directive	to	102400	or	less	(Scored)
+
+LimitRequestBody 102400 
+
 
 
 
