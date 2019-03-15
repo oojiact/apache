@@ -206,7 +206,7 @@ The	default	scoreboard	file	is logs/apache_status
 1.3.11	Restrict	Group	Write	Access	for	the	Apache	Directories	and	Files	
 (Scored)
 
-chmod -R g-w $APACHE_PREFIX
+chmod o-rwx /var/log/httpd
 
 1.3.12	Restrict	Group	Write	Access	for	the	Document	Root	Directories	
 and	Files	(Scored)
