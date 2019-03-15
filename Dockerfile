@@ -36,3 +36,9 @@ COPY ./conf.modules.d /opt/bitnami/apache/conf.modules.d
 #COPY modsecurity.d /opt/bitnami/apache/modsecurity.d
 COPY ./conf.d /opt/bitnami/apache/conf.d
 #RUN ln -s /bitnami/apache/conf/conf.modules.d /opt/bitnami/apache/conf/conf.modules.d
+RUN chown -R root /opt/bitnami/apache
+RUN chgrp -R root /opt/bitnami/apache
+RUN chmod -R o-w /opt/bitnami/apache
+RUN chown root:apache /var/log/httpd
+RUN chmod o-rwx /var/log/httpd
+RUN chmod o-rwx /var/log/httpd
