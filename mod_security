@@ -1,0 +1,50 @@
+https://blacksaildivision.com/apache-mod-security
+
+yum install automake libtool libxml2-devel
+
+cd ~/sources
+wget https://www.modsecurity.org/tarball/2.9.0/modsecurity-2.9.0.tar.gz
+tar -zxvf modsecurity-2.9.0.tar.gz
+
+cd modsecurity-2.9.0
+./autogen.sh
+./configure --with-apxs=/usr/local/apache2/bin/apxs --with-apr=/usr/local/apache2/bin/apr-1-config --with-apu=/usr/local/apache2/bin/apu-1-config
+make
+make install
+cp /usr/local/modsecurity/lib/mod_security2.so /usr/local/apache2/modules
+
+
+cd ~/sources
+wget -O owasp.tar.gz https://github.com/SpiderLabs/owasp-modsecurity-crs/tarball/master
+mkdir /usr/local/apache2/conf/crs
+tar -zxvf owasp.tar.gz -C /usr/local/apache2/conf/crs --strip 1
+cd /usr/local/apache2/conf/crs
+cp modsecurity_crs_10_setup.conf.example modsecurity_crs_10_setup.conf
+
+vi /usr/local/apache2/conf/extra/httpd-security.conf
+
+
+LoadModule security2_module modules/mod_security2.so
+
+<IfModule security2_module>
+      Include conf/crs/modsecurity_crs_10_setup.conf
+      Include conf/crs/base_rules/*.conf
+      # Include conf/crs/experimental_rules/*.conf
+      # Include conf/crs/optional_rules/*.conf
+
+      SecRuleEngine On
+      SecRequestBodyAccess On
+      SecResponseBodyAccess On 
+      SecResponseBodyMimeType text/plain text/html text/xml application/octet-stream
+      SecDataDir /tmp
+
+      # Debug log
+      SecDebugLog /usr/local/apache2/logs/modsec_debug.log
+      SecDebugLogLevel 3
+
+      SecAuditEngine RelevantOnly
+      SecAuditLogRelevantStatus ^2-5
+      SecAuditLogParts ABCIFHZ
+      SecAuditLogType Serial
+      SecAuditLog /usr/local/apache2/logs/modsec_audit.log
+</IfModule>
