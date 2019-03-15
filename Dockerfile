@@ -3,8 +3,8 @@ USER root
 RUN groupadd -r apache 
 RUN useradd apache -r -g apache -d /var/www -s /sbin/nologin
 RUN useradd www-data
-RUN install_packages bzip2-libs ca-certificates libffi libselinux ncurses-libs readline sqlite wget xz-libs libxml2 make pcre pcre-devel libxml2-devel mod_security
-RUN install_packages oracle-epel-release-el7 oracle-release-el7  python36 python-pip httpd-devel python36-devel gcc
+RUN install_packages bzip2-libs ca-certificates libffi libselinux ncurses-libs readline sqlite wget xz-libs libxml2 make pcre pcre-devel libxml2-devel mod_security lua-static httpd-devel python36-devel gcc
+RUN install_packages oracle-epel-release-el7 oracle-release-el7  python36 python-pip 
 RUN python3.6 -m venv py36env
 RUN source py36env/bin/activate
 RUN yum install -y python36-setuptools
