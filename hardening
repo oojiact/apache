@@ -189,6 +189,336 @@ chmod o-rwx /var/log/httpd
 
 1.3.8	Secure	the	Lock	File	(Scored)
 
+1.3.9	Secure	the	Pid	File	(Scored)
+
+Find	the	directory	in	which	the	PidFile would	be	created.	The	default	value	is	the	
+ServerRoot/logs directory
+
+Change	the	ownership	and	group	to	be	root:root,	if	not	already.
+
+1.3.10	Secure	the	ScoreBoard	File	(Scored)
+
+	ScoreBoardFile 
+	
+	
+The	default	scoreboard	file	is logs/apache_status
+
+1.3.11	Restrict	Group	Write	Access	for	the	Apache	Directories	and	Files	
+(Scored)
+
+chmod -R g-w $APACHE_PREFIX
+
+1.3.12	Restrict	Group	Write	Access	for	the	Document	Root	Directories	
+and	Files	(Scored)
+
+
+# find -L $DOCROOT -group $GRP -perm /g=w -print | xargs chmod g-w
+
+
+1.4.1	Deny	Access	to	OS	Root	Directory	(Scored)
+
+<Directory>
+. . .
+Require all denied
+. . .
+</Directory> 
+
+
+1.4.3	Restrict	Override	for	the	OS	Root	Directory	(Scored)
+
+<Directory />
+. . .
+AllowOverride None
+. . .
+</Directory> 
+
+
+1.4.4	Restrict	Override	for	All	Directories	(Scored)
+
+. . .
+AllowOverride None
+. . . 
+
+Remove	any	AllowOverrideList directives	found.
+
+
+1.5.1	Restrict	Options	for	the	OS	Root	Directory	(Scored)
+
+
+<Directory>
+. . .
+Options None
+. . .
+</Directory> 
+
+
+1.5.2	Restrict	Options	for	the	Web	Root	Directory	(Scored)
+
+<Directory "/usr/local/apache2/htdocs">
+. . .
+Options None
+. . .
+</Directory> 
+
+
+1.5.3	Minimize	Options	for	Other	Directories	(Scored)
+
+Ensure	that	the	Options directives	do	not	enable	Includes
+
+perl -ne 'print if /^ *<Directory */i .. /<\/Directory/i'
+$APACHE_PREFIX/conf/httpd.conf 
+
+
+1.5.4	Remove	Default	HTML	Content	(Scored)
+
+1.5.5	Remove	Default	CGI	Content	printenv	(Scored)
+
+ rm $APACHE_PREFIX/cgi-bin/printenv 
+ 
+ 1.5.6	Remove	Default	CGI	Content	test-cgi	(Scored)
+ 
+ rm $APACHE_PREFIX/cgi-bin/test-cgi 
+ 
+ 
+ 1.5.7	Limit	HTTP	Request	Methods	(Scored)
+
+# Limit HTTP methods to standard methods. Note: Does not limit TRACE
+<LimitExcept GET POST OPTIONS>
+Require all denied
+</LimitExcept> 
+
+
+<Directory "/usr/local/apache2/cgi-bin">
+. . .
+# Limit HTTP methods
+<LimitExcept GET POST OPTIONS>
+Require all denied
+</LimitExcept>
+</Directory> 
+
+
+1.5.8	Disable	HTTP	TRACE	Method	(Scored)
+
+Add	a	TraceEnable directive	to	the	server	level	configuration	with	a	value	of	off.	
+Server	level	configuration	is	the	top	level	configuration,	not	nested	within	any	other	
+directives	like	<Directory> or	<Location>
+
+
+1.5.9	Restrict	HTTP	Protocol	Versions	(Scored)
+
+LoadModule rewrite_module modules/mod_rewrite.so 
+
+
+RewriteEngine On
+RewriteOptions Inherit 
+
+
+RewriteEngine On
+RewriteCond %{THE_REQUEST} !HTTP/1\.1$
+RewriteRule .* - [F] 
+
+RewriteEngine On
+RewriteOptions Inherit 
+
+1.5.10	Restrict	Access	to	.ht*	files	(Scored)
+
+<FilesMatch "^\.ht">
+Require all denied
+</FilesMatch> 
+
+1.5.11	Restrict	File	Extensions	(Scored)
+
+# Block all files by default, unless specifically allowed.
+<FilesMatch "^.*$">
+Require all denied
+</FilesMatch> 
+
+
+# Allow files with specifically approved file extensions
+# Such as (css, htm; html; js; pdf; txt; xml; xsl; ...),
+# images (gif; ico; jpeg; jpg; png; ...), multimedia
+<FilesMatch "^.*\.(css|html?|js|pdf|txt|xml|xsl|gif|ico|jpe?g|png)$">
+Require all granted
+</FilesMatch> 
+
+
+
+1.5.12	Deny	IP	Address	Based	Requests	(Scored)
+
+LoadModule rewrite_module modules/mod_rewrite.so
+RewriteEngine On
+
+RewriteCond %{HTTP_HOST} !^www\.example\.com [NC]
+RewriteCond %{REQUEST_URI} !^/error [NC]
+RewriteRule ^.(.*) - [L,F]
+
+1.5.13	Restrict	Listen	Directive	(Scored)
+
+Listen 10.1.2.3:80
+Listen 192.168.4.5:80
+Listen [2001:db8::a00:20ff:fea7:ccea]:80 
+
+
+1.5.14	Restrict	Browser	Frame	Options	(Scored)
+
+Header always append X-Frame-Options SAMEORIGIN
+
+1.6.1	Configure	the	Error	Log	(Scored)
+
+LogLevel notice
+ErrorLog "logs/error_log" 
+
+
+1.6.2	Configure	a	Syslog	Facility	for	Error	Logging	(Scored)
+
+ErrorLog "syslog:local1" 
+
+1.6.3	Configure	the	Access	Log	(Scored)
+
+CustomLog log/access_log combined
+
+1.6.4	Log	Storage	and	Rotation	(Scored)
+
+/etc/logrotate.d/httpd 
+
+/var/log/httpd/*log {
+missingok
+notifempty
+sharedscripts
+postrotate
+/bin/kill -HUP `cat /var/run/httpd.pid 2>/dev/null` 2> /dev/null ||
+true
+endscript
+} 
+
+
+/etc/logrotate.d/httpd
+
+# rotate log files weekly
+weekly
+# keep 13 weeks of backlogs
+rotate 13 
+
+CustomLog "|bin/rotatelogs -l /var/logs/logfile.%Y.%m.%d 86400" combined
+
+1.6.5	Apply	Applicable	Patches	(Scored)
+
+1.7.1	Install	mod_ssl	and/or	mod_nss	(Scored)
+yum install mod_ssl
+
+
+1.7.2	Install	a	Valid	Trusted	Certificate	(Scored)
+
+$ openssl verify -CAfile /etc/pki/tls/certs/ca-bundle.crt -purpose sslserver
+/etc/pki/tls/certs/example.com.crt
+/etc/pki/tls/certs/example.com.crt: OK 
+
+
+
+1.7.3	Protect	the	Server's	Private	Key	(Scored)
+
+1.7.4	Disable	the	SSL	v3.0	Protocol	(Scored)
+
+1.7.5	Restrict	Weak	SSL	Ciphers	(Scored)
+
+1.7.6	Disable	SSL	Insecure	Renegotiation	(Scored)
+
+SSLInsecureRenegotiation off 
+1.7.7	Ensure	SSL	Compression	is	not	Enabled	(Scored)
+
+
+1.7.8	Disable	the	TLS	v1.0	Protocol	(Scored)
+
+1.7.9	Enable	OCSP	Stapling	(Scored)
+
+SSLUseStapling On
+SSLSessionCache "shmcb:logs/ssl_staple_cache(512000)"
+- orSSLSessionCache
+"dbm:logs/ssl_staple_cache.db"
+- or -
+SSLSessionCache dc:UNIX:logs/ssl_staple_socket 
+
+1.7.10	Enable	HTTP	Strict	Transport	Security	(Scored)
+
+Header always set Strict-Transport-Security "max-age=600" 
+
+
+1.8.1	Set	ServerToken	to	'Prod'	(Scored)
+
+ServerTokens Prod 
+
+install mod_security 
+
+1.8.2	Set	ServerSignature	to	'Off'	(Scored)
+
+
+1.8.3	Information	Leakage	via	Default	Apache	Content	(Scored)
+
+# Fancy directory listings
+#Include conf/extra/httpd-autoindex.conf 
+
+# We include the /icons/ alias for FancyIndexed directory listings. If
+# you do not use FancyIndexing, you may comment this out.
+#
+#Alias /icons/ "/var/www/icons/"
+#<Directory "/var/www/icons">
+# Options Indexes MultiViews FollowSymLinks
+# AllowOverride None
+# Order allow,deny
+# Allow from all
+#</Directory> 
+
+
+1.9.1	Set	TimeOut	to	10	or	less	(Scored)
+
+Timeout 10 
+
+1.9.2	Set	the	KeepAlive	directive	to	On	(Scored)
+
+KeepAlive On 
+
+
+1.9.3	Set	MaxKeepAliveRequests	to	100	or	greater	(Scored)
+
+MaxKeepAliveRequests 100 
+
+1.9.4	Set	KeepAliveTimeout	Low	to	Mitigate	Denial	of	Service	(Scored)
+
+KeepAliveTimeout 15 
+
+
+1.9.5	Set	Timeout	Limits	for	Request	Headers	(Scored)
+
+
+LoadModule reqtimeout_module modules/mod_reqtimeout.so 
+RequestReadTimeout header=20-40,MinRate=500 body=20,MinRate=500
+
+
+1.9.6	Set	Timeout	Limits	for	the	Request	Body	(Scored)
+
+LoadModule reqtimeout_module modules/mod_reqtimeout.so 
+RequestReadTimeout header=20-40,MinRate=500 body=20,MinRate=500 
+
+
+1.10.1	Set	the	LimitRequestLine	directive	to	512	or	less	(Scored)
+
+LimitRequestline 512 
+
+1.10.2	Set	the	LimitRequestFields	directive	to	100	or	less	(Scored)
+LimitRequestFields 100 
+
+
+1.10.3	Set	the	LimitRequestFieldsize	directive	to	1024	or	less	(Scored)
+
+LimitRequestFieldsize 1024
+
+
+
+
+
+
+
+
 
 
 
