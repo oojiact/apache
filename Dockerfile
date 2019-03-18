@@ -13,25 +13,4 @@ RUN pip install --upgrade pip
 RUN rm -rf /usr/bin/python
 RUN ln -s /usr/bin/python3.6 /usr/bin/python
 RUN python -m pip install mod_wsgi
-
-
-RUN mkdir -p /var/www/engine/documents && chown -R www-data:www-data /var/www/engine/documents
-RUN mkdir -p /var/www/engine/wsgi-scripts && chown -R www-data:www-data /var/www/engine/wsgi-scripts
-RUN mkdir -p /var/www/engine/certs && chown -R www-data:www-data /var/www/engine/certs
-RUN mkdir -p /var/log/engine && chown -R www-data:www-data /var/log/engine
-ADD ./conf.d/myapp.wsgi /var/www/engine/wsgi-scripts/myapp.wsgi
-#RUN echo "WSGIApplicationGroup %{GLOBAL}" >> /etc/apache2/apache2.conf
-#CMD ["apache2ctl", "-D", "FOREGROUND"]
-
 ENV PATH=/opt/bitnami/apache/bin:/opt/bitnami/nami/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
-ADD ./conf/httpd.conf /bitnami/apache/conf/httpd.conf
-ADD ./conf/mod_security.conf /bitnami/apache/conf/mod_security.conf
-ADD ./modules /opt/bitnami/apache/modules
-COPY ./conf.modules.d /opt/bitnami/apache/conf.modules.d
-COPY ./conf.d /opt/bitnami/apache/conf.d
-RUN chown -R root /opt/bitnami/apache
-RUN chgrp -R root /opt/bitnami/apache
-RUN chmod -R o-w /opt/bitnami/apache
-RUN chown root:apache /var/log/httpd
-RUN chmod o-rwx /var/log/httpd
-RUN chmod o-rwx /var/log/httpd
